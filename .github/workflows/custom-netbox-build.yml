@@ -1,0 +1,45 @@
+name: Custom NetBox Build
+
+on:
+  schedule:
+    - cron: '0 */6 * * *'  # Run every 6 hours
+  workflow_dispatch:  # Allow manual triggers
+
+jobs:
+  check-for-updates:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check for updates in netbox-docker
+        id: check
+        run: |
+          LATEST_COMMIT=$(curl -s "https://api.github.com/repos/netbox-community/netbox-docker/commits/main" | jq -r .sha)
+          echo "LATEST_COMMIT=$LATEST_COMMIT" >> $GITHUB_OUTPUT
+          if [ ! -f .last_commit ]; then
+            echo $LATEST_COMMIT > .last_commit
+            echo "UPDATE_DETECTED=true" >> $GITHUB_OUTPUT
+          elif [ "$LATEST_COMMIT" != "$(cat .last_commit)" ]; then
+            echo $LATEST_COMMIT > .last_commit
+            echo "UPDATE_DETECTED=true" >> $GITHUB_OUTPUT
+          else
+            echo "UPDATE_DETECTED=false" >> $GITHUB_OUTPUT
+          fi
+
+      - name: Trigger custom build
+        if: steps.check.outputs.UPDATE_DETECTED == 'true'
+        run: |
+          echo "Update detected in netbox-docker. Triggering custom build..."
+          # Add your custom build steps here
+          # For example:
+          # - Checkout your custom NetBox repository
+          # - Update necessary files or plugins
+          # - Build the Docker image
+          # - Push the image to your registry
+
+      - name: Save last commit
+        if: steps.check.outputs.UPDATE_DETECTED == 'true'
+        run: |
+          git config user.name github-actions
+          git config user.email github-actions@github.com
+          git add .last_commit
+          git commit -m "Update last checked commit"
+          git push
