@@ -28,12 +28,12 @@ jobs:
         if: steps.check.outputs.UPDATE_DETECTED == 'true'
         run: |
           echo "Update detected in netbox-docker. Triggering custom build..."
-          git clone https://github.com/yourusername/custom-netbox-docker.git
-          cd custom-netbox-docker
-          # Update Dockerfile or other files as needed
-          docker build -t yourusername/custom-netbox:latest .
-          echo ${{ secrets.DOCKERHUB_PASSWORD }} | docker login -u ${{ secrets.DOCKERHUB_USERNAME }} --password-stdin
-          docker push yourusername/custom-netbox:latest
+          # Build the Docker image
+          docker build -t ghcr.io/${{ github.repository_owner }}/netbox:latest .
+          
+          # Push the image to GitHub Container Registry
+          echo ${{ secrets.GITHUB_TOKEN }} | docker login ghcr.io -u ${{ github.actor }} --password-stdin
+          docker push ghcr.io/${{ github.repository_owner }}/netbox:latest
 
       - name: Save last commit
         if: steps.check.outputs.UPDATE_DETECTED == 'true'
