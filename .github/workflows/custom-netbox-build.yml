@@ -45,11 +45,14 @@ jobs:
         if: steps.check.outputs.UPDATE_DETECTED == 'true'
         run: |
           echo "Update detected in netbox-docker. Triggering custom build..."
+          # Convert repository name to lowercase
+          REPO_LOWERCASE=$(echo "${{ github.repository }}" | tr '[:upper:]' '[:lower:]')
+          
           # Build the Docker image
-          docker build -t ghcr.io/${{ steps.owner_lowercase.outputs.lowercase }}/netbox:latest .
+          docker build -t ghcr.io/${REPO_LOWERCASE}:latest .
           
           # Push the image to GitHub Container Registry
-          docker push ghcr.io/${{ steps.owner_lowercase.outputs.lowercase }}/netbox:latest
+          docker push ghcr.io/${REPO_LOWERCASE}:latest
 
       - name: Update last commit
         if: steps.check.outputs.UPDATE_DETECTED == 'true'
