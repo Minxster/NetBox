@@ -24,16 +24,20 @@ jobs:
             echo "UPDATE_DETECTED=false" >> $GITHUB_OUTPUT
           fi
       
+      - name: Convert owner to lowercase
+        id: owner_lowercase
+        run: echo "lowercase=$(echo ${{ github.repository_owner }} | tr '[:upper:]' '[:lower:]')" >> $GITHUB_OUTPUT
+      
       - name: Trigger custom build
         if: steps.check.outputs.UPDATE_DETECTED == 'true'
         run: |
           echo "Update detected in netbox-docker. Triggering custom build..."
           # Build the Docker image
-          docker build -t ghcr.io/${{ github.repository_owner }}/netbox:latest .
+          docker build -t ghcr.io/${{ steps.owner_lowercase.outputs.lowercase }}/netbox:latest .
           
           # Push the image to GitHub Container Registry
           echo ${{ secrets.GITHUB_TOKEN }} | docker login ghcr.io -u ${{ github.actor }} --password-stdin
-          docker push ghcr.io/${{ github.repository_owner }}/netbox:latest
+          docker push ghcr.io/${{ steps.owner_lowercase.outputs.lowercase }}/netbox:latest
 
       - name: Save last commit
         if: steps.check.outputs.UPDATE_DETECTED == 'true'
