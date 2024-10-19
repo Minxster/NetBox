@@ -23,17 +23,17 @@ jobs:
           else
             echo "UPDATE_DETECTED=false" >> $GITHUB_OUTPUT
           fi
-
+      
       - name: Trigger custom build
         if: steps.check.outputs.UPDATE_DETECTED == 'true'
         run: |
           echo "Update detected in netbox-docker. Triggering custom build..."
-          # Add your custom build steps here
-          # For example:
-          # - Checkout your custom NetBox repository
-          # - Update necessary files or plugins
-          # - Build the Docker image
-          # - Push the image to your registry
+          git clone https://github.com/yourusername/custom-netbox-docker.git
+          cd custom-netbox-docker
+          # Update Dockerfile or other files as needed
+          docker build -t yourusername/custom-netbox:latest .
+          echo ${{ secrets.DOCKERHUB_PASSWORD }} | docker login -u ${{ secrets.DOCKERHUB_USERNAME }} --password-stdin
+          docker push yourusername/custom-netbox:latest
 
       - name: Save last commit
         if: steps.check.outputs.UPDATE_DETECTED == 'true'
