@@ -48,7 +48,6 @@ jobs:
           ls -la
           
           # Build the Docker image
-          # If your Dockerfile is not in the root, specify the path, e.g., -f ./path/to/Dockerfile
           docker build -t ghcr.io/${REPO_LOWERCASE}:latest .
           
           # Push the image to GitHub Container Registry
